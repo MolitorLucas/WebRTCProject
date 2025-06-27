@@ -1,6 +1,5 @@
 'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Adicionado useEffect aqui
 import {
     MicrophoneIcon,
     VideoCameraIcon,
@@ -9,17 +8,35 @@ import {
     SpeakerWaveIcon,
     Cog6ToothIcon,
 } from '@heroicons/react/24/solid';
-
 import {
     VideoCameraSlashIcon,
     SpeakerXMarkIcon,
 } from '@heroicons/react/24/outline';
+import { useCallStore } from '../stores/useCallRestore'; // Ajuste o caminho conforme a estrutura do seu projeto
 
 export default function Controls() {
     const [isMicMuted, setIsMicMuted] = useState<boolean>(false);
     const [isCameraOff, setIsCameraOff] = useState<boolean>(false);
-    const [isSharingScreen, setIsSharingScreen] = useState<boolean>(false);
-    const [isSpeakerMuted, setIsSpeakerMuted] = useState<boolean>(false);
+
+    // Exemplo do useeffect da seção 4.2.1
+    const { setLocalStream } = useCallStore();
+
+    useEffect(() => {
+        const startMedia = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true,
+                });
+                setLocalStream(stream);
+            } catch (error) {
+                console.error('Erro ao acessar mídia:', error);
+                // Lidar com erros específicos aqui
+            }
+        };
+
+        startMedia();
+    }, [setLocalStream]); // Adicionado setLocalStream como dependência para evitar warnings
 
     const toggleMic = () => {
         setIsMicMuted(!isMicMuted);
@@ -27,14 +44,6 @@ export default function Controls() {
 
     const toggleCamera = () => {
         setIsCameraOff(!isCameraOff);
-    };
-
-    const toggleScreenShare = () => {
-        setIsSharingScreen(!isSharingScreen);
-    };
-
-    const toggleSpeaker = () => {
-        setIsSpeakerMuted(!isSpeakerMuted);
     };
 
     return (
@@ -63,28 +72,8 @@ export default function Controls() {
                 )}
             </button>
 
-            <button
-                onClick={toggleScreenShare}
-                className={`p-3 rounded-full transition duration-200 ${isSharingScreen ? 'bg-white hover:bg-gray-200' : 'bg-gray-700 hover:bg-gray-600'
-                    }`}
-            >
-                <ComputerDesktopIcon className={`h-6 w-6 ${isSharingScreen ? 'text-gray-900' : 'text-white'}`} />
-            </button>
-
             <button className="p-3 bg-red-600 rounded-full hover:bg-red-700 transition duration-200">
                 <PhoneXMarkIcon className="h-6 w-6 text-white" />
-            </button>
-
-            <button
-                onClick={toggleSpeaker}
-                className={`p-3 rounded-full transition duration-200 ${isSpeakerMuted ? 'bg-white hover:bg-gray-200' : 'bg-gray-700 hover:bg-gray-600'
-                    }`}
-            >
-                {isSpeakerMuted ? (
-                    <SpeakerXMarkIcon className="h-6 w-6 text-gray-900" />
-                ) : (
-                    <SpeakerWaveIcon className="h-6 w-6 text-white" />
-                )}
             </button>
 
             <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600 transition duration-200">
